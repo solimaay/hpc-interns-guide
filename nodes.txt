@@ -1,0 +1,3 @@
+# name  ip   (one node per line; the node called "login" is the login node)
+login 192.168.56.10
+compute1 192.168.56.11
