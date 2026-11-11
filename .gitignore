@@ -1,0 +1,7 @@
+.vagrant/
+*.box
+__pycache__/
+# Reports and evidence files created by the lab tools
+lab-report-*.txt
+evidence-*.txt
+.claude/
