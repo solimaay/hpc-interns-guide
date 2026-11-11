@@ -1,0 +1,34 @@
+Copyright (c) 2026 Ahmed Yousri Sobhi. All rights reserved.
+
+This material (the "Work") is the original work of Ahmed Yousri Sobhi (the
+"Author"), who owns and retains all copyright in it. The Work is not a work
+made for hire and no copyright in it is assigned to anyone.
+
+Subject to the terms below, the Author grants the course provider and its
+enrolled learners (the "Licensee") a non-exclusive, non-transferable,
+non-sublicensable, revocable-on-breach license to host, run, copy and use the
+Work internally, for the purpose of delivering and taking the course in which
+it is supplied. The Licensee may adapt the Work for that purpose; the Author
+keeps ownership of the original and the Licensee keeps ownership of nothing
+in it beyond what this license grants.
+
+The Licensee must:
+  - keep this notice and the copyright line in every copy and adaptation;
+  - not claim authorship or ownership of the Work, and not register or assert
+    any intellectual-property right in it;
+  - not redistribute it outside the course, or sell it, without the Author's
+    written permission.
+
+This license is not exclusive. The Author may use, publish, license and
+modify the same or similar material elsewhere, in any form, for any purpose.
+
+The Work is provided "as is", without warranty of any kind. It is a
+disposable training lab; the Author is not liable for any damages arising
+from its use.
+
+Third-party software the lab downloads at run time (for example Rocky Linux,
+Slurm, MUNGE, Vagrant boxes) is not part of the Work and stays under its
+own licenses.
+
+[DRAFT: wording to be reviewed by the Author (and ideally a lawyer) before
+sending; delete this line once agreed.]
