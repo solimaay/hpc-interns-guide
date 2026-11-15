@@ -1,15 +1,15 @@
 # 05 - Containers
 
-Chapter 10. A hands-on introduction to containers with Podman, with Docker comparisons at each step and a summary table at the end. The last part, optional, runs a container under Slurm with Apptainer.
+Chapter 10. A hands-on introduction to containers with Podman, with Docker comparisons at each step and a summary table at the end.
 
-Prerequisite: chapters 1 to 5 ([01-sysadmin-foundations](../01-sysadmin-foundations/README.md)); chapter 7 ([03-slurm](../03-slurm/README.md)) for the optional part.
+Prerequisite: chapters 1 to 5 ([01-sysadmin-foundations](../01-sysadmin-foundations/README.md)). This module is independent of Slurm and of the other modules.
 
 ## Tools
 
 | Tool | Where it comes from | What it does |
 |---|---|---|
-| `provision.sh` | run with `vagrant provision --provision-with containers` | Installs Podman and Apptainer, prepares rootless Podman for `vagrant`, and (login node) saves the practice image to `/shared/containers-lab/alpine.tar`. |
-| `container-verify` | installed by `vagrant up` and by the provisioner | Checks that this node is ready: Podman, subordinate IDs, a rootless test container, SELinux boolean, the staged image, Apptainer. |
+| `provision.sh` | run with `vagrant provision --provision-with containers` | Installs Podman, prepares rootless Podman for `vagrant`, and (login node) saves the practice image to `/shared/containers-lab/alpine.tar`. |
+| `container-verify` | installed by `vagrant up` and by the provisioner | Checks that this node is ready: Podman, subordinate IDs, a rootless test container, SELinux boolean, the staged image. |
 
 ## Chapter 10 - Containers with Podman
 

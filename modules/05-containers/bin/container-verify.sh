@@ -50,10 +50,6 @@ else warn SELinux "virt_use_nfs is off, so containers cannot use /shared" "sudo 
 if [ -s "$STAGE/alpine.tar" ]; then pass "Offline image" "$STAGE/alpine.tar"
 else warn "Offline image" "$STAGE/alpine.tar is missing" "run the provisioner on the login node"; fi
 
-# Apptainer (optional part)
-if command -v apptainer >/dev/null; then pass "Apptainer (opt.)" "$(apptainer --version)"
-else warn "Apptainer (opt.)" "not installed; only the optional part needs it" "run the provisioner again"; fi
-
 echo
 if [ "$fails" -gt 0 ]; then echo "Result: NOT READY ($fails failed)"; exit 1; fi
 echo "Result: CONTAINERS READY"

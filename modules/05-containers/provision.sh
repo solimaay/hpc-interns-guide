@@ -6,8 +6,7 @@
 #   vagrant provision compute1 --provision-with containers
 #
 # What it does:
-#   - install Podman (Rocky AppStream) and Apptainer (EPEL, for the optional last part)
-#   - make sure /etc/localtime exists (Apptainer needs it)
+#   - install Podman (Rocky AppStream)
 #   - give the 'vagrant' user a subordinate UID/GID range, which rootless Podman needs
 #   - allow containers to read NFS (SELinux boolean virt_use_nfs)
 #   - login node: pull the practice image once and save it to /shared/containers-lab/alpine.tar,
@@ -28,11 +27,6 @@ log "preparing $LAB_NODE ($LAB_ROLE)"
 
 # ---- packages -----------------------------------------------------------------
 dnf -y install podman shadow-utils >/dev/null
-dnf -y install epel-release >/dev/null
-dnf -y install apptainer >/dev/null || log "WARNING: Apptainer not installed; only the optional part needs it"
-
-# ---- Apptainer bind-mounts /etc/localtime; the box image has none ----------------
-[ -e /etc/localtime ] || ln -sf /usr/share/zoneinfo/UTC /etc/localtime
 
 # ---- rootless Podman: subordinate IDs for the learner account ----------------
 for u in vagrant; do

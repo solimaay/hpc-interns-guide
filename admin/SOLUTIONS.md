@@ -93,6 +93,5 @@ The chapter plants no faults. The expected observations:
 | Part 3, with `:Z` | Works; label becomes `container_file_t`; the file is owned by the learner's UID; `uid_map` maps container 0 to the learner |
 | Part 3, `/shared` | On `compute1` (NFS client) works because `virt_use_nfs` is on; on `login` it is denied (`/shared` is local, `default_t`); `:Z` does not apply on NFS |
 | Part 5 | Same image runs on both nodes; the hostname printed is the node's (via `--hostname`) |
-| Part 7 | `srun apptainer exec` prints the learner's own username and the compute node's name |
 
 If Part 3 does not deny the first write, SELinux is not enforcing on that node (`getenforce`).

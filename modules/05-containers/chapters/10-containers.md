@@ -10,11 +10,10 @@ A container runs a program together with everything it needs, in its own private
 - Pull images and run, list, inspect and remove containers.
 - See how file ownership and SELinux behave when you share a folder with a container.
 - Build a small image and run it on both nodes.
-- Optional: run a container under Slurm with Apptainer.
 
 ## Before you start
 
-- Chapters 1 to 5 are done. Chapter 7 is only needed for Part 7.
+- Chapters 1 to 5 are done. This chapter does not need Slurm.
 - Prepare the nodes, `login` first, from your host in the lab folder:
 
   ```bash
@@ -177,26 +176,6 @@ podman system df
 
 `container-verify` should still say `CONTAINERS READY`. (It loads the practice image again; that is fine.)
 
-## Part 7 - Optional: a container under Slurm
-
-Needs Chapter 7 finished. HPC sites rarely let users run Podman or Docker on compute nodes; they use **Apptainer**, which runs as the calling user, keeps the image in one `.sif` file and needs no daemon.
-
-On `login`, turn the staged image into a `.sif` on shared storage:
-
-```bash
-export APPTAINER_CACHEDIR=/tmp/apptainer-cache
-apptainer build /shared/scratch/alpine.sif docker-archive:///shared/containers-lab/alpine.tar
-apptainer exec /shared/scratch/alpine.sif cat /etc/os-release | head -2
-```
-
-(With internet access `apptainer pull alpine.sif docker://alpine:3.20` does the same.) Now run it on the compute node through Slurm:
-
-```bash
-srun -N1 apptainer exec /shared/scratch/alpine.sif sh -c 'echo "$(whoami) on $(hostname)"'
-```
-
-You are still yourself, not root, and you did not need to log in to `compute1`. Remove the file afterwards: `rm /shared/scratch/alpine.sif`.
-
 ## Docker and Podman at a glance
 
 | | Podman | Docker |
@@ -208,7 +187,7 @@ You are still yourself, not root, and you did not need to log in to `compute1`. 
 | Multi-container | `podman compose`, pods, Kubernetes YAML | Docker Compose |
 | Run at boot | systemd units (Quadlet) | restart policies in the daemon |
 | Fit for shared HPC nodes | acceptable, rootless | not recommended |
-| What HPC sites usually use | Apptainer for user jobs | not on compute nodes |
+| What HPC sites often use for user jobs | Apptainer (not covered here) | not on shared compute nodes |
 
 ## Check yourself
 
@@ -229,7 +208,7 @@ Rootless Podman: the user who ran it. Docker: `root`.
 
 <details><summary>4. Why do HPC sites prefer Apptainer to Docker on compute nodes?</summary>
 
-Docker needs a root daemon, and access to it is root access. Apptainer runs as the user, works with the scheduler like any other program and ships the image as one file.
+Docker needs a root daemon, and access to it is root access. Apptainer runs as the user and ships the image as one file. It is outside this lab, but you will meet it on real clusters.
 </details>
 
 <details><summary>5. `podman ps` is empty but the disk is filling up. Where do you look?</summary>

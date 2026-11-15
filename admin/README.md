@@ -121,7 +121,7 @@ Notes:
 
 ## 6b. The containers chapter
 
-Chapter 10 uses [module 05-containers](../modules/05-containers/README.md). It is independent of Slurm except for the optional Part 7.
+Chapter 10 uses [module 05-containers](../modules/05-containers/README.md). It is independent of Slurm and of every other module.
 
 | When | Task | Command |
 |---|---|---|
