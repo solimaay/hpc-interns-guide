@@ -119,6 +119,25 @@ Notes:
 - **Memory.** The 1280 MB nodes are enough, including the build. `slurmctld` uses about 18 MB and `slurmd` about 11 MB. Adding `slurmdbd` and MariaDB was not tested.
 - **Common failures to watch for:** clocks that differ (munge), a munge key that differs between nodes, `RealMemory` larger than the node has (node drained), directories not owned by `slurm`, and a `slurm.conf` that differs between nodes. `slurm-verify` reports most of these.
 
+## 6b. The containers chapter
+
+Chapter 10 uses [module 05-containers](../modules/05-containers/README.md). It is independent of Slurm except for the optional Part 7.
+
+| When | Task | Command |
+|---|---|---|
+| Before the chapter | Make sure the login node can reach `docker.io` (the practice image is `alpine:3.20`) | `vagrant ssh login -c "curl -sI https://registry-1.docker.io/v2/ \| head -1"` |
+| Start of the chapter | Prepare every node, `login` first | `vagrant provision <node> --provision-with containers` |
+| During | Learners run `container-verify` as `vagrant` and follow the chapter | |
+| After | Nothing to clean up on shared storage except the staged image, which can stay | |
+
+Notes:
+
+- **Rootless, as `vagrant`.** The lab accounts have NFS homes, and rootless Podman cannot keep its image store on NFS, so the chapter does not use them. The provisioner gives `vagrant` a subordinate ID range.
+- **Offline fallback.** The login node saves the practice image to `/shared/containers-lab/alpine.tar`. Learners without registry access use `podman load -i`.
+- **SELinux.** The provisioner sets `virt_use_nfs` so `/shared` can be mounted into a container. The chapter deliberately lets learners hit the `:Z` denial on a local folder.
+- **Docker is not installed** on purpose; the Docker comparisons are text.
+- **Memory.** Alpine-based containers fit the 1280 MB nodes. Avoid large images.
+
 ## 7. Support tools for your own use
 
 These are installed on every node and are useful when a learner asks for help or when you triage a problem.
@@ -128,7 +147,7 @@ These are installed on every node and are useful when a learner asks for help or
 | `node-health` | See in one screen whether a node is healthy (Slurm state, load, memory, full disks, hung mounts, services, clock) |
 | `why-pending [jobid]` | Explain a pending job's reason code in plain words and see who has to act |
 | `collect-evidence <user> [jobid]` | Capture the standard facts for a ticket in one file |
-| `lab-verify`, `slurm-verify` | Check the lab base and the Slurm build |
+| `lab-verify`, `slurm-verify`, `container-verify` | Check the lab base, the Slurm build and container readiness |
 | `inject-fault --reveal` | See which problem a learner was given |
 
 ## 8. Maintaining the lab

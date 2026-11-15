@@ -79,3 +79,20 @@ Each entry lists what is planted, how to diagnose, the fix, and points for the d
 
 - Two separate mechanisms are in play. Fixing only one still leaves bob locked out.
 - Accounts are local on each node (no LDAP in the lab), so the fix is needed on every affected node. Link this to why centralized identity matters.
+
+---
+
+## Chapter 10 - Containers (check-yourself answers)
+
+The chapter plants no faults. The expected observations:
+
+| Step | Expected |
+|---|---|
+| Part 1 | Host shows Rocky, container shows Alpine; `uname -r` identical inside and out; the container's `sleep` appears in the host `ps` |
+| Part 3, no `:Z` | `Permission denied` writing to `~/work` (label `user_home_t`) |
+| Part 3, with `:Z` | Works; label becomes `container_file_t`; the file is owned by the learner's UID; `uid_map` maps container 0 to the learner |
+| Part 3, `/shared` | Works because `virt_use_nfs` is on; `:Z` does not apply on NFS |
+| Part 5 | Same image runs on both nodes; the hostname printed is the node's (via `--hostname`) |
+| Part 7 | `srun apptainer exec` prints the learner's own username and the compute node's name |
+
+If Part 3 does not deny the first write, SELinux is not enforcing on that node (`getenforce`).
