@@ -13,7 +13,7 @@ A container runs a program together with everything it needs, in its own private
 
 ## Before you start
 
-- Chapters 1 to 5 are done. This chapter does not need Slurm.
+- Chapters 1 to 5 are done.
 - Prepare the nodes, `login` first, from your host in the lab folder:
 
   ```bash

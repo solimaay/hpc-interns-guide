@@ -58,6 +58,30 @@ why-pending 1234         # one job
 
 It is read-only. Use it to understand the user's question before you answer, and `collect-evidence` (module [02-troubleshooting](../02-troubleshooting/README.md)) when you need to escalate.
 
+## Example - Run a container as a job
+
+Optional. Needs the Slurm cluster from Chapter 7 and the [containers module](../05-containers/README.md) provisioned on every node (`vagrant provision <node> --provision-with containers`). On `login`, as `vagrant`, write a job script that runs the practice image on whichever compute node Slurm picks:
+
+```bash
+cat > ~/container-job.sh <<'EOS'
+#!/bin/bash
+#SBATCH --job-name=container-demo
+#SBATCH --output=%x-%j.out
+# Load the image if this node does not have it yet (the node's own store is private).
+podman image exists docker.io/library/alpine:3.20 || podman load -q -i /shared/containers-lab/alpine.tar
+podman run --rm --hostname "$(hostname)" docker.io/library/alpine:3.20 \
+  sh -c 'echo "container on $(hostname): $(. /etc/os-release; echo $PRETTY_NAME)"'
+echo "job ran as $(id -un) on $(hostname)"
+EOS
+sbatch ~/container-job.sh
+squeue
+cat ~/container-demo-*.out
+```
+
+The container ran on the compute node, started by Slurm as you, with no root daemon involved. Two things to notice: the job had to load the image itself, because each node keeps its own image store; and the job can only use what the node provides, so a missing image or a node without Podman fails the job, not the scheduler. Remove the files afterwards: `rm ~/container-job.sh ~/container-demo-*.out`.
+
+> Many HPC sites do not allow Podman or Docker in jobs and offer Apptainer instead (it runs as the user and keeps the image in one file). The job script looks the same with `apptainer exec image.sif ...` in place of `podman run`.
+
 ## Which Slurm version
 
 The lab builds Slurm 26.05.5 from the official source tarball at `download.schedmd.com` and checks its SHA-256 before building. EPEL only offers Slurm 22.05, an old release that upstream no longer supports, so the packages from the distribution would teach you to run a version you should not run. The build uses the same steps an admin uses on a real cluster: `rpmbuild -ta`, then install the packages with `dnf`.

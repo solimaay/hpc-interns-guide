@@ -2,7 +2,7 @@
 
 Chapter 10. A hands-on introduction to containers with Podman, with Docker comparisons at each step and a summary table at the end.
 
-Prerequisite: chapters 1 to 5 ([01-sysadmin-foundations](../01-sysadmin-foundations/README.md)). This module is independent of Slurm and of the other modules.
+Prerequisite: chapters 1 to 5 ([01-sysadmin-foundations](../01-sysadmin-foundations/README.md)). This module is independent of the other modules.
 
 ## Tools
 

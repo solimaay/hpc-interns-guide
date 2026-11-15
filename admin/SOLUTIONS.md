@@ -95,3 +95,5 @@ The chapter plants no faults. The expected observations:
 | Part 5 | Same image runs on both nodes; the hostname printed is the node's (via `--hostname`) |
 
 If Part 3 does not deny the first write, SELinux is not enforcing on that node (`getenforce`).
+
+The optional "Run a container as a job" example is in [module 03-slurm](../modules/03-slurm/README.md). Expected: the job's `.out` file shows the Alpine release, the learner's own username and a compute node's name.
