@@ -111,14 +111,16 @@ Read the first line: container UID 0 is your UID, and the next range comes from 
 
 > **Docker comparison.** Docker's daemon runs as real root, so the same file would be owned by `root` on the host, and a container started with `-v /:/host` has full root access to the machine. This is the main reason HPC sites avoid Docker on shared nodes.
 
-Can a container use `/shared`? The provisioner turned on the SELinux boolean `virt_use_nfs` for this:
+Can a container use `/shared`? Try it on `compute1`, where `/shared` is an NFS mount. The provisioner turned on the SELinux boolean `virt_use_nfs` for this:
 
 ```bash
 podman run --rm -v /shared/scratch:/data docker.io/library/alpine:3.20 sh -c 'echo from-container > /data/c-demo.txt'
 ls -ln /shared/scratch/c-demo.txt
 ```
 
-Do not use `:Z` on NFS; relabeling does not work there.
+It works, and the file belongs to your user ID again. Do not use `:Z` on NFS; relabeling does not work there.
+
+On `login` the same command is denied: there `/shared` is a plain local folder (the NFS *server* side), labelled `default_t`, and the NFS boolean does not apply. Do not relabel it with `:Z`; that would change the label of the whole export. Containers are meant to run on compute nodes anyway.
 
 ## Part 4 - Build your own image
 
@@ -140,7 +142,7 @@ podman build -t hello:1 .
 podman run --rm --hostname "$(hostname)" hello:1
 ```
 
-Each line is a layer. Change the greeting in `hello.sh`, build again as `hello:2`, and watch the unchanged layers come from cache. `podman history hello:2` lists the layers.
+Each line is a layer. Change the greeting in `hello.sh` and build again as `hello:2`. The `FROM` layer is reused; every step from the changed `COPY` onward is rebuilt, which is why you put what changes least at the top. `podman history hello:2` lists the layers.
 
 > **Docker comparison.** `docker build` reads a `Dockerfile`; Podman reads `Containerfile` or `Dockerfile`. Podman builds without a daemon (Buildah is the engine under it).
 
@@ -168,7 +170,7 @@ On both nodes:
 ```bash
 podman rm -af
 podman rmi -af
-rm -f /shared/scratch/hello-1.tar /shared/scratch/c-demo.txt
+rm -f /shared/scratch/hello-1.tar /shared/scratch/c-demo.txt   # on compute1 the last one
 rm -rf ~/work ~/hello
 podman system df
 ```
