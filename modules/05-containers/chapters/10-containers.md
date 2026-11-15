@@ -10,6 +10,7 @@ A container runs a program together with everything it needs, in its own private
 - Pull images and run, list, inspect and remove containers.
 - See how file ownership and SELinux behave when you share a folder with a container.
 - Build a small image and run it on both nodes.
+- Run a task as a container: input in, output out, exit code back.
 
 ## Before you start
 
@@ -162,7 +163,47 @@ The output names `compute1`, because `--hostname` passes the node name in (a con
 
 > **Docker comparison.** `docker save` and `docker load` work the same way, and both need the daemon running on each node. Real sites use a registry instead of tar files; `podman push` and `podman pull` talk to one.
 
-## Part 6 - Clean up
+## Part 6 - Example: run a task as a container
+
+A batch job is a command with an input, an output and an exit code. A container suits it: the environment is the same wherever it runs, and nothing is left behind. Try it on `login`.
+
+Make an input file and a small task script in a folder:
+
+```bash
+mkdir -p ~/job
+printf 'banana\napple\ncherry\napple\n' > ~/job/input.txt
+cat > ~/job/task.sh <<'EOS'
+#!/bin/sh
+sort /job/input.txt | uniq -c > /job/output.txt
+EOS
+```
+
+Run it as a container. The folder is the only thing shared with it:
+
+```bash
+podman run --rm -v ~/job:/job:Z docker.io/library/alpine:3.20 sh /job/task.sh
+echo "exit=$?"
+cat ~/job/output.txt
+```
+
+You get `2 apple`, `1 banana`, `1 cherry`. Notice the steps and what each one is for:
+
+| Step | Why |
+|---|---|
+| Input goes in through the mounted folder | the container itself is thrown away |
+| Output comes back through the same folder | `--rm` deletes the container, but the file stays on the host |
+| `--rm` | no stopped containers pile up |
+| `$?` is the container's exit code | this is how a script, or later a scheduler, knows whether the task worked |
+
+Check that failure is visible too:
+
+```bash
+podman run --rm docker.io/library/alpine:3.20 sh -c 'exit 3'; echo "exit=$?"
+```
+
+It prints `exit=3`. A scheduler would run this same one command for you on a compute node; as in Part 5, that node needs the image first.
+
+## Part 7 - Clean up
 
 On both nodes:
 
@@ -170,7 +211,7 @@ On both nodes:
 podman rm -af
 podman rmi -af
 rm -f /shared/scratch/hello-1.tar /shared/scratch/c-demo.txt   # on compute1 the last one
-rm -rf ~/work ~/hello
+rm -rf ~/work ~/hello ~/job
 podman system df
 ```
 

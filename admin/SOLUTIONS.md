@@ -93,7 +93,6 @@ The chapter plants no faults. The expected observations:
 | Part 3, with `:Z` | Works; label becomes `container_file_t`; the file is owned by the learner's UID; `uid_map` maps container 0 to the learner |
 | Part 3, `/shared` | On `compute1` (NFS client) works because `virt_use_nfs` is on; on `login` it is denied (`/shared` is local, `default_t`); `:Z` does not apply on NFS |
 | Part 5 | Same image runs on both nodes; the hostname printed is the node's (via `--hostname`) |
+| Part 6 | `output.txt` holds the sorted counts (`2 apple`, `1 banana`, `1 cherry`); the failing run prints `exit=3` |
 
 If Part 3 does not deny the first write, SELinux is not enforcing on that node (`getenforce`).
-
-The optional "Run a container as a job" example is in [module 03-slurm](../modules/03-slurm/README.md). Expected: the job's `.out` file shows the Alpine release, the learner's own username and a compute node's name.
