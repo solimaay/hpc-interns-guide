@@ -121,11 +121,11 @@ Notes:
 
 ## 6b. The containers chapter
 
-Chapter 10 uses [module 05-containers](../modules/05-containers/README.md). It is independent of Slurm and of every other module.
+Chapter 10 uses [module 05-containers](../modules/05-containers/README.md). It does not need Slurm, except for the optional Part 7 (a container as a Slurm job, which needs chapter 7 finished).
 
 | When | Task | Command |
 |---|---|---|
-| Before the chapter | Make sure the login node can reach `docker.io` (the practice image is `alpine:3.20`) | `vagrant ssh login -c "curl -sI https://registry-1.docker.io/v2/ \| head -1"` |
+| Before the chapter | Make sure the login node can reach `docker.io` (the practice image is `rockylinux:9`, about 180 MB) | `vagrant ssh login -c "curl -sI https://registry-1.docker.io/v2/ \| head -1"` |
 | Start of the chapter | Prepare every node, `login` first | `vagrant provision <node> --provision-with containers` |
 | During | Learners run `container-verify` as `vagrant` and follow the chapter | |
 | After | Nothing to clean up on shared storage except the staged image, which can stay | |
@@ -133,10 +133,11 @@ Chapter 10 uses [module 05-containers](../modules/05-containers/README.md). It i
 Notes:
 
 - **Rootless, as `vagrant`.** The lab accounts have NFS homes, and rootless Podman cannot keep its image store on NFS, so the chapter does not use them. The provisioner gives `vagrant` a subordinate ID range.
-- **Offline fallback.** The login node saves the practice image to `/shared/containers-lab/alpine.tar`. Learners without registry access use `podman load -i`.
+- **Offline fallback.** The login node saves the practice image to `/shared/containers-lab/rockylinux-9.tar`. Learners without registry access use `podman load -i`.
+- **Lingering.** The provisioner runs `loginctl enable-linger vagrant` so `/run/user/<uid>` exists on compute nodes; without it rootless Podman fails inside Slurm jobs (`lstat /run/user/1000`), and the job can still show `COMPLETED`.
 - **SELinux.** The provisioner sets `virt_use_nfs` so `/shared` can be mounted into a container. The chapter deliberately lets learners hit the `:Z` denial on a local folder.
 - **Docker is not installed** on purpose; the Docker comparisons are text.
-- **Memory.** Alpine-based containers fit the 1280 MB nodes. Avoid large images.
+- **Size and memory.** The practice image is about 180 MB, and the staged tar on `/shared` is about the same. Both fit the 1280 MB nodes; avoid much larger images.
 
 ## 7. Support tools for your own use
 
