@@ -7,6 +7,7 @@
 # This folder is shared into every VM as /vagrant, so the scripts run straight from it.
 # Chapter 7 adds modules/03-slurm/provision.sh:  vagrant provision <node> --provision-with slurm
 # Chapter 10 adds modules/05-containers/provision.sh:  vagrant provision <node> --provision-with containers
+# Chapters 11-12 add modules/06-parallel/provision.sh:  vagrant provision <node> --provision-with parallel
 
 NODES = File.readlines(File.join(__dir__, 'nodes.txt')).reject { |l| l =~ /^\s*(#|$)/ }.map(&:split)
 
@@ -37,6 +38,7 @@ Vagrant.configure('2') do |config|
       node.vm.provision 'base',  type: 'shell', inline: 'bash /vagrant/core/provision-base.sh'
       node.vm.provision 'slurm', type: 'shell', inline: 'bash /vagrant/modules/03-slurm/provision.sh', run: 'never'
       node.vm.provision 'containers', type: 'shell', inline: 'bash /vagrant/modules/05-containers/provision.sh', run: 'never'
+      node.vm.provision 'parallel', type: 'shell', inline: 'bash /vagrant/modules/06-parallel/provision.sh', run: 'never'
     end
   end
 end

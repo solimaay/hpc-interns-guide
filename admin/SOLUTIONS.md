@@ -97,3 +97,23 @@ The chapter plants no faults. The expected observations:
 | Part 7 (optional, needs Slurm) | The job's `.out` file shows the Rocky release, the learner's own username and a compute node's name |
 
 If Part 3 does not deny the first write, SELinux is not enforcing on that node (`getenforce`).
+
+---
+
+## Chapters 11 and 12 - OpenMP and Open MPI (expected observations)
+
+The chapters plant no faults.
+
+| Step | Expected |
+|---|---|
+| Ch 11 Part 1 | `nproc` is 1, so one thread by default; `OMP_NUM_THREADS=4` gives four lines in a changing order. Building without `-fopenmp` fails to link `omp_get_thread_num` |
+| Ch 11 Part 2 | `race` is right with 1 thread and usually wrong (and different per run) with 2 or more; `fixed` (reduction) is always 500000500000 |
+| Ch 11 Part 3 | pi is 3.1415926536 at every thread count; time does not drop (one CPU) |
+| Ch 12 Part 1 | `-np 4` fails with "not enough slots"; `--oversubscribe` works |
+| Ch 12 Part 2 | With `authorized_keys` hidden, ssh asks for a password or `mpirun` reports that it could not start the daemons |
+| Ch 12 Part 3 | Without `--prefix`, the remote node reports it cannot find `orted`; with it, one line from each node. A hang points at the network interface, fixed by the two `OMPI_MCA_*_tcp_if_include` variables. `--map-by node` alternates ranks between nodes |
+| Ch 12 Part 4 | `ring` prints a token of 103 with 4 ranks; `pi` with 2 ranks on 2 nodes takes about half the 1-rank time |
+| Ch 12 Part 5 | `hybrid` prints 2 ranks with 2 threads each, one rank per node |
+
+The code and commands have not been run on a live cluster yet. Run Chapters 11 and 12 once after `vagrant up` and adjust timings if your hardware differs.
+

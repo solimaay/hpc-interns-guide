@@ -52,6 +52,8 @@ Self-paced; each chapter assumes the earlier ones.
 | 7-8 | [Build Slurm, verify it, read pending jobs](modules/03-slurm/README.md) | 4-6 h |
 | 9 | [Node health checks](modules/04-health-monitoring/README.md) | 45 min |
 | 10 | [Containers with Podman](modules/05-containers/README.md) (with Docker comparisons) | 1.5 h |
+| 11 | [OpenMP: threads on one node](modules/06-parallel/chapters/11-openmp.md) | 1 h |
+| 12 | [Open MPI: one program on several nodes](modules/06-parallel/chapters/12-openmpi.md) | 1.5 h |
 
 ## Layout
 
