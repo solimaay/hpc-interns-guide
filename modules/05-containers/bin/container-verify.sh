@@ -9,7 +9,7 @@ set -u
 
 . /etc/hpc-lab-release 2>/dev/null || { echo "Not a lab node."; exit 1; }
 STAGE="$LAB_SHARED/containers-lab"
-IMAGE=docker.io/library/alpine:3.20
+IMAGE=docker.io/library/rockylinux:9
 
 fails=0
 pass() { printf '[PASS] %-14s %s\n' "$1" "$2"; }
@@ -35,11 +35,11 @@ else fail "Subuid/subgid" "no range for $(id -un) in /etc/subuid or /etc/subgid"
 # can it run a container? prefer the staged image so a missing internet is not a failure here
 if command -v podman >/dev/null; then
   if ! podman image exists "$IMAGE" 2>/dev/null; then
-    if [ -s "$STAGE/alpine.tar" ]; then podman load -q -i "$STAGE/alpine.tar" >/dev/null 2>&1
+    if [ -s "$STAGE/rockylinux-9.tar" ]; then podman load -q -i "$STAGE/rockylinux-9.tar" >/dev/null 2>&1
     else podman pull -q "$IMAGE" >/dev/null 2>&1; fi
   fi
   if [ "$(podman run --rm "$IMAGE" echo ok 2>/dev/null)" = ok ]; then pass "Run container" "rootless run works"
-  else fail "Run container" "could not run $IMAGE" "podman run --rm $IMAGE echo ok   (read the error; is $STAGE/alpine.tar there?)"; fi
+  else fail "Run container" "could not run $IMAGE" "podman run --rm $IMAGE echo ok   (read the error; is $STAGE/rockylinux-9.tar there?)"; fi
 fi
 
 # SELinux boolean for NFS
@@ -47,8 +47,8 @@ if [ "$(getsebool virt_use_nfs 2>/dev/null | awk '{print $3}')" = on ]; then pas
 else warn SELinux "virt_use_nfs is off, so containers cannot use /shared" "sudo setsebool -P virt_use_nfs 1"; fi
 
 # staged image
-if [ -s "$STAGE/alpine.tar" ]; then pass "Offline image" "$STAGE/alpine.tar"
-else warn "Offline image" "$STAGE/alpine.tar is missing" "run the provisioner on the login node"; fi
+if [ -s "$STAGE/rockylinux-9.tar" ]; then pass "Offline image" "$STAGE/rockylinux-9.tar"
+else warn "Offline image" "$STAGE/rockylinux-9.tar is missing" "run the provisioner on the login node"; fi
 
 echo
 if [ "$fails" -gt 0 ]; then echo "Result: NOT READY ($fails failed)"; exit 1; fi

@@ -88,11 +88,12 @@ The chapter plants no faults. The expected observations:
 
 | Step | Expected |
 |---|---|
-| Part 1 | Host shows Rocky, container shows Alpine; `uname -r` identical inside and out; the container's `sleep` appears in the host `ps` |
+| Part 1 | The container has far fewer packages than the host (about 140 vs several hundred); `uname -r` identical inside and out; the container's `sleep` appears in the host `ps` |
 | Part 3, no `:Z` | `Permission denied` writing to `~/work` (label `user_home_t`) |
 | Part 3, with `:Z` | Works; label becomes `container_file_t`; the file is owned by the learner's UID; `uid_map` maps container 0 to the learner |
 | Part 3, `/shared` | On `compute1` (NFS client) works because `virt_use_nfs` is on; on `login` it is denied (`/shared` is local, `default_t`); `:Z` does not apply on NFS |
 | Part 5 | Same image runs on both nodes; the hostname printed is the node's (via `--hostname`) |
 | Part 6 | `output.txt` holds the sorted counts (`2 apple`, `1 banana`, `1 cherry`); the failing run prints `exit=3` |
+| Part 7 (optional, needs Slurm) | The job's `.out` file shows the Rocky release, the learner's own username and a compute node's name |
 
 If Part 3 does not deny the first write, SELinux is not enforcing on that node (`getenforce`).

@@ -11,10 +11,11 @@ A container runs a program together with everything it needs, in its own private
 - See how file ownership and SELinux behave when you share a folder with a container.
 - Build a small image and run it on both nodes.
 - Run a task as a container: input in, output out, exit code back.
+- Optional: run the container as a Slurm job.
 
 ## Before you start
 
-- Chapters 1 to 5 are done.
+- Chapters 1 to 5 are done. Part 7 is optional and needs the Slurm cluster from Chapter 7.
 - Prepare the nodes, `login` first, from your host in the lab folder:
 
   ```bash
@@ -24,10 +25,10 @@ A container runs a program together with everything it needs, in its own private
 
 - On each node, as `vagrant`: `container-verify` should end with `Result: CONTAINERS READY`.
 - Take a snapshot: `vagrant snapshot save before-containers`.
-- Images are pulled from a public registry. If you have no internet access, load the staged copy instead whenever a step pulls `alpine`:
+- Images are pulled from a public registry. If you have no internet access, load the staged copy instead whenever a step pulls `rockylinux`:
 
   ```bash
-  podman load -i /shared/containers-lab/alpine.tar
+  podman load -i /shared/containers-lab/rockylinux-9.tar
   ```
 
 ## Part 1 - What is a container?
@@ -35,16 +36,17 @@ A container runs a program together with everything it needs, in its own private
 On `login`:
 
 ```bash
-cat /etc/os-release | head -2
-podman run --rm docker.io/library/alpine:3.20 cat /etc/os-release | head -2
+rpm -qa | wc -l
+podman run --rm docker.io/library/rockylinux:9 rpm -qa | wc -l
+podman run --rm docker.io/library/rockylinux:9 cat /etc/os-release | head -2
 ```
 
-The first command shows Rocky Linux. The second shows Alpine Linux, yet you never installed or booted Alpine. `--rm` removes the container when it exits.
+The host has hundreds of packages; the container has far fewer, because an image carries only what its program needs. Both say Rocky Linux, but the container brought its own copy of the userland (files, libraries, tools) and never booted anything. `--rm` removes the container when it exits.
 
 A container is an ordinary process with a private view of files, processes and network, made with kernel features (namespaces and cgroups). It shares the host's kernel. A VM has its own kernel. See it from the host:
 
 ```bash
-podman run -d --name sleeper docker.io/library/alpine:3.20 sleep 600
+podman run -d --name sleeper docker.io/library/rockylinux:9 sleep 600
 ps -ef | grep '[s]leep 600'
 podman ps
 uname -r
@@ -66,21 +68,21 @@ podman logs sleeper
 podman exec -it sleeper sh
 ```
 
-Inside the container, run `hostname`, `id` and `ps`, then `exit`. You are `root` in there; keep that in mind for Part 3.
+Inside the container, run `hostname`, `id` and `cat /proc/1/cmdline`, then `exit`. Process 1 is your `sleep`: the container has no init system of its own. (`ps` is not even installed in the image; images carry only what they need.) You are `root` in there; keep that in mind for Part 3.
 
 Stop and remove it, then run one that just prints and exits:
 
 ```bash
 podman stop -t 1 sleeper
 podman rm sleeper
-podman run --name once docker.io/library/alpine:3.20 echo hello
+podman run --name once docker.io/library/rockylinux:9 echo hello
 podman ps -a
 podman rm once
 ```
 
 `ps -a` shows stopped containers too. Without `--rm` they stay until you remove them, which is how disks fill up. `podman system df` shows what images and containers use.
 
-> **Docker comparison.** These commands are the same; `alias docker=podman` works. Podman wants full image names (`docker.io/library/alpine`) or asks which registry to use for a short name.
+> **Docker comparison.** These commands are the same; `alias docker=podman` works. Podman wants full image names (`docker.io/library/rockylinux`) or asks which registry to use for a short name.
 
 ## Part 3 - Your files in a container
 
@@ -88,14 +90,14 @@ Make a folder on the node and mount it into a container with `-v host:container`
 
 ```bash
 mkdir -p ~/work
-podman run --rm -v ~/work:/data docker.io/library/alpine:3.20 sh -c 'echo hi > /data/a.txt'
+podman run --rm -v ~/work:/data docker.io/library/rockylinux:9 sh -c 'echo hi > /data/a.txt'
 ```
 
 It fails with `Permission denied`, although you own `~/work`. This is SELinux (Chapter 4): the folder's label is not one containers may write. Read it, then ask Podman to relabel the folder for the container with `:Z`:
 
 ```bash
 ls -Zd ~/work
-podman run --rm -v ~/work:/data:Z docker.io/library/alpine:3.20 sh -c 'echo hi > /data/a.txt'
+podman run --rm -v ~/work:/data:Z docker.io/library/rockylinux:9 sh -c 'echo hi > /data/a.txt'
 ls -Zd ~/work
 ls -ln ~/work/a.txt
 id -u
@@ -114,7 +116,7 @@ Read the first line: container UID 0 is your UID, and the next range comes from 
 Can a container use `/shared`? Try it on `compute1`, where `/shared` is an NFS mount. The provisioner turned on the SELinux boolean `virt_use_nfs` for this:
 
 ```bash
-podman run --rm -v /shared/scratch:/data docker.io/library/alpine:3.20 sh -c 'echo from-container > /data/c-demo.txt'
+podman run --rm -v /shared/scratch:/data docker.io/library/rockylinux:9 sh -c 'echo from-container > /data/c-demo.txt'
 ls -ln /shared/scratch/c-demo.txt
 ```
 
@@ -133,7 +135,7 @@ cat > hello.sh <<'EOS'
 echo "Hello from $(hostname), running $(. /etc/os-release; echo $PRETTY_NAME)"
 EOS
 cat > Containerfile <<'EOS'
-FROM docker.io/library/alpine:3.20
+FROM docker.io/library/rockylinux:9
 COPY hello.sh /usr/local/bin/hello.sh
 RUN chmod +x /usr/local/bin/hello.sh
 CMD ["/usr/local/bin/hello.sh"]
@@ -159,7 +161,7 @@ podman load -i /shared/scratch/hello-1.tar               # compute1
 podman run --rm --hostname "$(hostname)" hello:1   # compute1
 ```
 
-The output names `compute1`, because `--hostname` passes the node name in (a container otherwise gets a random ID as its hostname), but it is the same Alpine. That is the point of a container: one image behaves the same everywhere. Compare `podman images` on both nodes.
+The output names `compute1`, because `--hostname` passes the node name in (a container otherwise gets a random ID as its hostname), but it is the same Rocky image. That is the point of a container: one image behaves the same everywhere. Compare `podman images` on both nodes.
 
 > **Docker comparison.** `docker save` and `docker load` work the same way, and both need the daemon running on each node. Real sites use a registry instead of tar files; `podman push` and `podman pull` talk to one.
 
@@ -181,7 +183,7 @@ EOS
 Run it as a container. The folder is the only thing shared with it:
 
 ```bash
-podman run --rm -v ~/job:/job:Z docker.io/library/alpine:3.20 sh /job/task.sh
+podman run --rm -v ~/job:/job:Z docker.io/library/rockylinux:9 sh /job/task.sh
 echo "exit=$?"
 cat ~/job/output.txt
 ```
@@ -198,12 +200,36 @@ You get `2 apple`, `1 banana`, `1 cherry`. Notice the steps and what each one is
 Check that failure is visible too:
 
 ```bash
-podman run --rm docker.io/library/alpine:3.20 sh -c 'exit 3'; echo "exit=$?"
+podman run --rm docker.io/library/rockylinux:9 sh -c 'exit 3'; echo "exit=$?"
 ```
 
 It prints `exit=3`. A scheduler would run this same one command for you on a compute node; as in Part 5, that node needs the image first.
 
-## Part 7 - Clean up
+## Part 7 - Optional: run the container as a Slurm job
+
+Only if you have built Slurm in Chapter 7; skip it otherwise. On `login`, as `vagrant`, write a job script that runs the practice image on whichever compute node Slurm picks:
+
+```bash
+cat > ~/container-job.sh <<'EOS'
+#!/bin/bash
+#SBATCH --job-name=container-demo
+#SBATCH --output=/shared/scratch/%x-%j.out
+# Load the image if this node does not have it yet (each node has its own image store).
+podman image exists docker.io/library/rockylinux:9 || podman load -q -i /shared/containers-lab/rockylinux-9.tar
+podman run --rm --hostname "$(hostname)" docker.io/library/rockylinux:9 \
+  sh -c 'echo "container on $(hostname): $(. /etc/os-release; echo $PRETTY_NAME)"'
+echo "job ran as $(id -un) on $(hostname)"
+EOS
+sbatch ~/container-job.sh
+squeue
+cat /shared/scratch/container-demo-*.out
+```
+
+The output file is on `/shared` because your home directory is local to each node, and the job ran on `compute1`. The container ran on the compute node, started by Slurm as you, with no root daemon involved. Three things to notice: the job had to load the image itself, because each node keeps its own image store; rootless Podman needs `/run/user/<your UID>`, which normally exists only while you are logged in, so the provisioner turns on *lingering* for `vagrant` to keep it there (without it the job fails with `lstat /run/user/1000`, yet still shows `COMPLETED` if the last command succeeds, so always read the output file); and the job can only use what the node provides, so a missing image or a node without Podman fails the job, not the scheduler.
+
+> Many HPC sites do not allow Podman or Docker in jobs and offer Apptainer instead (it runs as the user and keeps the image in one file). The job script looks the same with `apptainer exec image.sif ...` in place of `podman run`.
+
+## Part 8 - Clean up
 
 On both nodes:
 
@@ -211,7 +237,8 @@ On both nodes:
 podman rm -af
 podman rmi -af
 rm -f /shared/scratch/hello-1.tar /shared/scratch/c-demo.txt   # on compute1 the last one
-rm -rf ~/work ~/hello ~/job
+rm -rf ~/work ~/hello ~/job ~/container-job.sh
+rm -f /shared/scratch/container-demo-*.out
 podman system df
 ```
 
@@ -232,7 +259,7 @@ podman system df
 
 ## Check yourself
 
-<details><summary>1. A container shows `Rocky` on the host and `Alpine` inside. Is it a VM? How do you know?</summary>
+<details><summary>1. A container looks like a complete Rocky system. Is it a VM? How do you know?</summary>
 
 No. It is a process sharing the host kernel: `uname -r` is the same inside and outside, and the container's processes appear in the host's `ps`.
 </details>
@@ -261,7 +288,7 @@ Docker needs a root daemon, and access to it is root access. Apptainer runs as t
 
 - `container-verify` names the missing piece.
 - `Error: ... newuidmap` or `cannot set up namespace`: the `vagrant` user has no subordinate ID range; run the provisioner again.
-- A pull hangs or fails: no internet or a registry limit. Use `podman load -i /shared/containers-lab/alpine.tar`.
+- A pull hangs or fails: no internet or a registry limit. Use `podman load -i /shared/containers-lab/rockylinux-9.tar`.
 - To start over: `vagrant snapshot restore before-containers`.
 
 ## Next
