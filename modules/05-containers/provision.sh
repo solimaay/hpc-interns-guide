@@ -8,15 +8,16 @@
 # What it does:
 #   - install Podman (Rocky AppStream)
 #   - give the 'vagrant' user a subordinate UID/GID range, which rootless Podman needs
+#   - enable lingering for 'vagrant', so /run/user/<uid> exists for batch jobs
 #   - allow containers to read NFS (SELinux boolean virt_use_nfs)
-#   - login node: pull the practice image once and save it to /shared/containers-lab/alpine.tar,
+#   - login node: pull the practice image once and save it to /shared/containers-lab/rockylinux-9.tar,
 #     the offline fallback for learners who cannot reach a registry
 #   - install container-verify (for labs built before this module existed)
 #
 # Safe to run more than once.
 set -euo pipefail
 
-IMAGE=docker.io/library/alpine:3.20
+IMAGE=docker.io/library/rockylinux:9
 
 log() { echo "[containers] $*"; }
 
@@ -34,20 +35,23 @@ for u in vagrant; do
   grep -q "^$u:" /etc/subgid 2>/dev/null || usermod --add-subgids 100000-165535 "$u"
 done
 
+# ---- keep /run/user/<uid> present without a login: batch jobs (Slurm) have no session, and rootless Podman needs it
+loginctl enable-linger vagrant
+
 # ---- SELinux: let containers use NFS (needed to mount /shared into a container) ----
 setsebool -P virt_use_nfs 1
 
 # ---- login node: stage the practice image for offline use --------------------
 if [ "$LAB_ROLE" = login ]; then
   mkdir -p "$STAGE"
-  if [ -s "$STAGE/alpine.tar" ]; then
+  if [ -s "$STAGE/rockylinux-9.tar" ]; then
     log "practice image already staged (skipping the pull)"
   else
     log "pulling $IMAGE"
     podman pull -q "$IMAGE" >/dev/null
-    podman save -o "$STAGE/alpine.tar" "$IMAGE"
+    podman save -o "$STAGE/rockylinux-9.tar" "$IMAGE"
   fi
-  chmod 755 "$STAGE"; chmod 644 "$STAGE/alpine.tar"
+  chmod 755 "$STAGE"; chmod 644 "$STAGE/rockylinux-9.tar"
 fi
 
 # ---- the check tool -----------------------------------------------------------
