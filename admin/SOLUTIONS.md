@@ -100,7 +100,7 @@ If Part 3 does not deny the first write, SELinux is not enforcing on that node (
 
 ---
 
-## Chapters 11 and 12 - OpenMP and Open MPI (expected observations)
+## Chapters 11 to 13 - OpenMP, Open MPI and Slurm jobs (expected observations)
 
 The chapters plant no faults.
 
@@ -114,6 +114,9 @@ The chapters plant no faults.
 | Ch 12 Part 3 | Without `--prefix`, the remote node reports it cannot find `orted`; with it, one line from each node. A hang points at the network interface, fixed by the two `OMPI_MCA_*_tcp_if_include` variables. `--map-by node` alternates ranks between nodes |
 | Ch 12 Part 4 | `ring` prints a token of 103 with 4 ranks; `pi` with 2 ranks on 2 nodes takes about half the 1-rank time |
 | Ch 12 Part 5 | `hybrid` prints 2 ranks with 2 threads each, one rank per node |
+| Ch 13 Parts 1-3 | `show_map.sh` reports: A one process with 4 threads (OpenMP), B 4 ranks (MPI), C 2 ranks x 2 threads (hybrid); everything on `compute1`, `cpu0` |
+| Ch 13 Part 4 | `sacct` shows `NNodes` 1 and `AllocCPUS` 1 for all three jobs |
+| Ch 13 Part 5 | Without `--oversubscribe` job B fails with "not enough slots" |
 
-The code and commands have not been run on a live cluster yet. Run Chapters 11 and 12 once after `vagrant up` and adjust timings if your hardware differs.
+The code and commands have not been run on a live cluster yet. Run Chapters 11 to 13 once after `vagrant up` and adjust timings if your hardware differs.
 
