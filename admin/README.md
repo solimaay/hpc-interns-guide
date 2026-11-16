@@ -139,6 +139,23 @@ Notes:
 - **Docker is not installed** on purpose; the Docker comparisons are text.
 - **Size and memory.** The practice image is about 180 MB, and the staged tar on `/shared` is about the same. Both fit the 1280 MB nodes; avoid much larger images.
 
+## 6c. The OpenMP and Open MPI chapters
+
+Chapters 11 and 12 use [module 06-parallel](../modules/06-parallel/README.md). They do not need Slurm; the Slurm notes in the chapters are optional.
+
+| When | Task | Command |
+|---|---|---|
+| Start of the chapters | Prepare every node (about 1 minute each; needs the Rocky repositories) | `vagrant provision <node> --provision-with parallel` |
+| During | Learners run `parallel-verify` and follow the chapters | |
+| After | Nothing to clean up; the work folders are under alice's home and the learner removes them | |
+
+Notes:
+
+- **One CPU per node.** OpenMP shows no speed-up (a teaching point), and `mpirun -np 4` on one node needs `--oversubscribe`. Two ranks on two nodes do speed up.
+- **Open MPI install path.** Rocky puts it in `/usr/lib64/openmpi`. Chapter 12 passes `--prefix` because SSH starts a non-login shell on the other node.
+- **Network interface.** Each VM has a NAT interface with the same address and the lab network `192.168.56.0/24`. Without `OMPI_MCA_btl_tcp_if_include` and `OMPI_MCA_oob_tcp_if_include`, `mpirun` can hang. The firewall already trusts the lab subnet.
+- **Alice.** Chapter 12 uses `alice` because her home is on `/shared`, so the program path is the same on both nodes. The chapter creates her SSH key if Chapter 3 was skipped.
+
 ## 7. Support tools for your own use
 
 These are installed on every node and are useful when a learner asks for help or when you triage a problem.
