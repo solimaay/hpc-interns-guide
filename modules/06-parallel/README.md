@@ -25,9 +25,12 @@ vagrant ssh login -c parallel-verify
 2. [Chapter 12 - Open MPI: one program on several nodes](chapters/12-openmpi.md)
 3. [Chapter 13 - OpenMP and Open MPI as Slurm jobs](chapters/13-parallel-on-slurm.md) (needs Slurm; uses the ready-made programs in [lab/](lab/))
 
-## Slides
+## Slides and guide
 
-[slides/openmp-part1-slides.pptx](slides/openmp-part1-slides.pptx): 13 slides (about 25 minutes) to present before Chapter 11 and the OpenMP part of Chapter 13. Speaker notes are on every slide. The program output on the slides comes from running the lab's own programs on a 16-core machine.
+- [slides/openmp-part1-slides.pptx](slides/openmp-part1-slides.pptx): 13 slides (about 25 minutes) to present before Chapter 11 and the OpenMP part of Chapter 13. Speaker notes are on every slide.
+- [openmp-companion-guide.md](openmp-companion-guide.md): the same material as a stand-alone reading guide.
+
+The program output in both comes from running the lab's own programs on a 16-core machine.
 
 ## Notes
 
