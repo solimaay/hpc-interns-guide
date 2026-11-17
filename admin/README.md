@@ -141,7 +141,7 @@ Notes:
 
 ## 6c. The OpenMP and Open MPI chapters
 
-Chapters 11 and 12 use [module 06-parallel](../modules/06-parallel/README.md). They do not need Slurm; the Slurm notes in the chapters are optional.
+Chapters 11 to 13 use [module 06-parallel](../modules/06-parallel/README.md). Chapters 11 and 12 do not need Slurm; Chapter 13 needs the Slurm cluster from Chapter 7 working and submits jobs as `alice` from `~/lab13` (a copy of `modules/06-parallel/lab`).
 
 | When | Task | Command |
 |---|---|---|
@@ -154,6 +154,7 @@ Notes:
 - **One CPU per node.** OpenMP shows no speed-up (a teaching point), and `mpirun -np 4` on one node needs `--oversubscribe`. Two ranks on two nodes do speed up.
 - **Open MPI install path.** Rocky puts it in `/usr/lib64/openmpi`. Chapter 12 passes `--prefix` because SSH starts a non-login shell on the other node.
 - **Network interface.** Each VM has a NAT interface with the same address and the lab network `192.168.56.0/24`. Without `OMPI_MCA_btl_tcp_if_include` and `OMPI_MCA_oob_tcp_if_include`, `mpirun` can hang. The firewall already trusts the lab subnet.
+- **Chapter 13 sizing.** The jobs ask Slurm for 1 CPU and start more workers (threads, or `mpirun --oversubscribe`), because the one compute node has one CPU. `sacct` therefore shows `AllocCPUS` 1 against 4 workers, which the chapter uses as a teaching point.
 - **Alice.** Chapter 12 uses `alice` because her home is on `/shared`, so the program path is the same on both nodes. The chapter creates her SSH key if Chapter 3 was skipped.
 
 ## 7. Support tools for your own use

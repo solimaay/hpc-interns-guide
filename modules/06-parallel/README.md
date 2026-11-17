@@ -1,8 +1,8 @@
 # 06 - Parallel programs: OpenMP and Open MPI
 
-Chapters 11 and 12. Two short, hands-on guides with small C programs: OpenMP (threads on one node) and Open MPI (programs spread across both nodes). The aim is to understand them well enough to support users, not to write production code.
+Chapters 11 to 13. Three short, hands-on guides with small C programs: OpenMP (threads on one node) and Open MPI (programs spread across both nodes), then how to read OpenMP and MPI jobs on Slurm. The aim is to understand them well enough to support users, not to write production code.
 
-Prerequisite: chapters 1 to 5 ([01-sysadmin-foundations](../01-sysadmin-foundations/README.md)). Chapter 7 ([03-slurm](../03-slurm/README.md)) is only needed for the optional Slurm remarks.
+Prerequisite: chapters 1 to 5 ([01-sysadmin-foundations](../01-sysadmin-foundations/README.md)). Chapter 7 ([03-slurm](../03-slurm/README.md)) is only needed for Chapter 13 and the optional Slurm remarks.
 
 ## Tools
 
@@ -23,6 +23,13 @@ vagrant ssh login -c parallel-verify
 
 1. [Chapter 11 - OpenMP: threads on one node](chapters/11-openmp.md)
 2. [Chapter 12 - Open MPI: one program on several nodes](chapters/12-openmpi.md)
+3. [Chapter 13 - OpenMP and Open MPI as Slurm jobs](chapters/13-parallel-on-slurm.md) (needs Slurm; uses the ready-made programs in [lab/](lab/))
+
+## Guide
+
+- [openmp-openmpi-companion-guide.md](openmp-openmpi-companion-guide.md): a stand-alone reading guide on OpenMP, Open MPI and hybrid jobs, and how to recognise them in a Slurm job. Read it before Chapters 11 to 13.
+
+The OpenMP program output comes from running the lab's own programs on a 16-core machine. The Open MPI and hybrid output is the expected output from Chapters 12 and 13.
 
 ## Notes
 
